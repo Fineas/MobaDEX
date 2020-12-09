@@ -2,6 +2,7 @@ package com.example.mobadex;
 
 import android.os.Bundle;
 
+import com.example.mobadex.ui.main.Session;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -17,6 +18,8 @@ import com.example.mobadex.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Session sess;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +31,14 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = findViewById(R.id.fab);
 
+        // GET USER SESSION
+        sess = Session.getInstance();
+        if(sess.getToken().equals("")){
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1); // DON'T ALLOW UNREGISTERED USERS
+        }
+
+        // TODO BUTTON FUNCTIONALITY
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

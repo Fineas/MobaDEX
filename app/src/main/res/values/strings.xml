@@ -8,4 +8,14 @@
     <string name="send">SEND</string>
     <string name="text">TEXT</string>
     <string name="friend_username">Friend Username</string>
+    <string name="register">Register</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="error">ERROR!</string>
+    <string name="mobadex_logo">MobaDEX Logo</string>
+    <string name="login">Login</string>
+    <string name="title_activity_show_moba">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="FLAG">HackTM{fake_flag}</string>
 </resources>
