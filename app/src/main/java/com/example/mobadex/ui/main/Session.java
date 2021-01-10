@@ -2,9 +2,11 @@ package com.example.mobadex.ui.main;
 
 public class Session {
 
-    private String Flag = "HackTM{\\_(*-*)_/\\_(moba_dex)_/}";
+    // SECRET FLAG
+    private String Flag = "HackTM{it_was_un(INTENT)ional}";
     private String token;
     private static Session instance = null;
+
     protected Session() {
         this.token = "";
     }
@@ -15,6 +17,7 @@ public class Session {
     public void setToken(String token){
         this.token = token;
     }
+
     public static Session getInstance() {
         if(instance == null) {
             instance = new Session();

@@ -3,6 +3,7 @@ package com.example.mobadex;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,11 +44,34 @@ public class ReadMobaFragment extends Fragment {
     private List<Integer> mobs_ids; // LIST OF MOBS' ID
     private List<String> mobs_data;
 
+    // Create the Handler
+    private Handler handler = new Handler();
+
+    // Define the code block to be executed
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            // Insert custom code here
+            // RELOAD MOBS
+            if(getActivity() != null){
+                do_load_mobs();
+                // Repeat every 2 seconds
+                handler.postDelayed(runnable, 1000);
+            }
+            else{
+                return;
+            }
+        }
+    };
+
+    /*
+    Retrieve All Mobs for the user with token==sess.getToken() and display then on the Screen.
+     */
     int do_load_mobs(){
 
         // ESTABLISH HTTP CONNECTION
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.241.141.11:8001/api.php";
+        String url = "http://35.246.216.38:8686/api.php";
 
         // PARAMETERS
         RequestBody registration_params = new FormBody.Builder()
@@ -154,6 +178,7 @@ public class ReadMobaFragment extends Fragment {
                                     // IF MOBA IS UNREAD, ADD ONCLICK LISTENER
                                     if(status.getContentDescription().toString().equals("UNREAD")){
 
+                                        // ON CLICK LAUNCH ProcessMoba class and send moba_id + moba_data
                                         num.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -166,6 +191,11 @@ public class ReadMobaFragment extends Fragment {
                                                 intent.putExtra("moba_id",moba_str_id);
                                                 intent.putExtra("moba_data",moba_data);
                                                 startActivity(intent);
+
+//                                                Intent intent2 = new Intent(getActivity(), ShowMoba.class);
+//                                                intent2.putExtra("display_id",moba_str_id);
+//                                                intent2.putExtra("display_content","Validate ID"+moba_str_id);
+//                                                startActivity(intent2);
                                             }
                                         });
                                     }
@@ -200,13 +230,13 @@ public class ReadMobaFragment extends Fragment {
 
         // GET USER SESSION
         sess = Session.getInstance();
+
+        handler.post(runnable);
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        // RELOAD MOBS
-        do_load_mobs();
     }
 }

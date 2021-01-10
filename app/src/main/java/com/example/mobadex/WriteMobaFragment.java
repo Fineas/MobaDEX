@@ -50,7 +50,7 @@ public class WriteMobaFragment extends Fragment {
 
         // ESTABLISH HTTP CONNECTION
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.241.141.11:8001/api.php";
+        String url = "http://35.246.216.38:8686/api.php";
 
         // GET FRIEND USERNAME FROM INPUT
         EditText editText1 = (EditText) resources.findViewById(R.id.editTextTextPersonName4);

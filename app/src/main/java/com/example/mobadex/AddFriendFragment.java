@@ -53,7 +53,7 @@ public class AddFriendFragment extends Fragment {
 
         // ESTABLISH HTTP CONNECTION
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.241.141.11:8001/api.php";
+        String url = "http://35.246.216.38:8686/api.php";
 
         // GET FRIEND USERNAME FROM INPUT
         EditText editText1 = (EditText) resources.findViewById(R.id.editTextTextPersonName4);
@@ -87,13 +87,14 @@ public class AddFriendFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(friend_username.equals("Admin")){
+                            if(friend_username.equals("Admin_FeDEX")){
                                 updateTextView("Cannot add Admin!");
                                 Log.d("[MobaDEX]", myResponse);
                             }
                             else if(myResponse.equals("Failed to connect to MySQL: ") ||
                                     myResponse.equals("Invalid Token.") ||
                                     myResponse.equals("Invalid Username.") ||
+                                    myResponse.equals("Invalid Operation.") ||
                                     myResponse.equals("Friend Already Exists")){
                                 Log.d("[MobaDEX]","ERROR!");
                                 updateTextView("Error!");

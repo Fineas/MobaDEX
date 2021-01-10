@@ -47,7 +47,7 @@ public class ShowMoba extends AppCompatActivity {
 
         // ESTABLISH HTTP CONNECTION
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.241.141.11:8001/api.php";
+        String url = "http://35.246.216.38:8686/api.php";
 
         // PARAMETERS
         RequestBody registration_params = new FormBody.Builder()
@@ -197,14 +197,15 @@ public class ShowMoba extends AppCompatActivity {
         // GET ID FROM INTENT
         Intent intent = getIntent();
         String moba_content = intent.getStringExtra("display_content");
+        Log.d("[MobaDEX]","Doing display_content "+moba_content);
         String moba_id = intent.getStringExtra("display_id");
-
-        // GET USER SESSION
-        sess = Session.getInstance();
 
         // SHOW MOBA
         TextView display_content = findViewById(R.id.fullscreen_content);
         display_content.setText(moba_content);
+
+        // GET USER SESSION
+        sess = Session.getInstance();
 
         // MARK MOBA AS READ
         do_read_moba(moba_id);

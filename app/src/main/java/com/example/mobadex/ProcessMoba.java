@@ -83,22 +83,23 @@ public class ProcessMoba extends AppCompatActivity {
         // GET USER SESSION
         sess = Session.getInstance();
 
-        // GET INTENT
+        // GET INTENT AND DATA
         Intent i = getIntent();
         String moba_data = i.getStringExtra("moba_data");
         String moba_id = i.getStringExtra("moba_id");
 
 
-
         // Parse INTENT DATA
         Bundle data = deserialize_moba(moba_data);
-        display_bundle_extras(data);
 
-        String moba_content = data.getString("moba_display_content");
-        String moba_package = data.getString("moba_display_package");
+        // RETRIEVE CLASS USED TO DISPLAY THE MOBA
         String moba_class = data.getString("moba_display_class");
+        String moba_package = data.getString("moba_display_package");
 
-        // SHOW MOBA
+        // RETRIEVE DATA TO BE DISPLAYED
+        String moba_content = data.getString("moba_display_content");
+
+        // DISPLAY MOBA
         Intent intent = new Intent();
         intent.setClassName(moba_package, moba_class);
         intent.putExtra("display_content",moba_content);
@@ -117,22 +118,23 @@ public class ProcessMoba extends AppCompatActivity {
             String get_session_method = data.getString("moba_data");
             String extra_data = "";
             try {
-                Log.d("[MobaDEX]","**********"+get_session_method);
                 Method method = sess.getClass().getMethod(get_session_method);
                 extra_data = (String)method.invoke(sess);
-
-                Log.d("[MobaDEX]","GOT EXTRA:"+extra_data);
             } catch (SecurityException e) {
                 Log.d("[MobaDEX]","Error:" + e);
+                finish();
             }
             catch (NoSuchMethodException e) {
                 Log.d("[MobaDEX]","Error:" + e);
+                finish();
             }
             catch( IllegalAccessException e) {
                 Log.d("[MobaDEX]","Error:" + e);
+                finish();
             }
             catch( InvocationTargetException e) {
                 Log.d("[MobaDEX]","Error:" + e);
+                finish();
             }
             Intent tmp_bund = new Intent();
             tmp_bund.putExtra("moba_display_content",extra_data);
