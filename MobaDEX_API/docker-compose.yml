@@ -1,0 +1,45 @@
+version: "3.1"
+services:
+    www:
+        build: .
+        ports: 
+            - "8001:80"
+        volumes:
+            - ./www:/var/www/html/
+        links:
+            - db
+        networks:
+            - default
+        environment:
+            MYSQL_DATABASE: mobadex_db
+            MYSQL_USER: mobadex_admin
+            MYSQL_PASSWORD: fedex_00_mobadex
+            SECRET_TOK: f0a347cce90f210e2e9ded79887d52815b85e78fd5d4acabad2d54266dd7eeeb
+    db:
+        image: mysql:8.0
+        ports: 
+            - "3306:3306"
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: mobadex_db
+            MYSQL_USER: mobadex_admin
+            MYSQL_PASSWORD: fedex_00_mobadex
+            MYSQL_ROOT_PASSWORD: test 
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+            - ./conf:/etc/mysql/conf.d
+            - persistent:/var/lib/mysql
+        networks:
+            - default
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        links: 
+            - db:db
+        ports:
+            - 8007:80
+        environment:
+            MYSQL_USER: mobadex_admin
+            MYSQL_PASSWORD: fedex_00_mobadex
+            MYSQL_ROOT_PASSWORD: test 
+volumes:
+    persistent:
