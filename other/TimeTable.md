@@ -1,4 +1,4 @@
-# MobaDEX Timetable
+# Timetable
 
 
 | Task        | Start Date           | Deadline  | Status |
