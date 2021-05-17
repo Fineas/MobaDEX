@@ -6,8 +6,8 @@
 // 6xP0R1sioF5knfv - send moba
 // gJMauFlbAtmpOel - read moba
 // hvD6trFjj5PF0sA - load mobas 
-// KVY2ERbWMEGBgob
-// BuD93I754ZVwUjv
+// KVY2ERbWMEGBgob - get friend token
+// BuD93I754ZVwUjv - mark moba as read
 // PU9BWUeCzxoNZ9L
 // 8RKkRtU5QAARlgj
 // hnoeIZlcuo4Pj5p
@@ -130,9 +130,8 @@ if( isset($_POST) ){
         $result = $result->fetch_array(MYSQLI_NUM);
 
         if(password_verify($password, $result[2])){
-          /* The password is correct. */
-          $login = TRUE;
-          echo "Login Success";
+          /* The password is correct. Return User ID */
+          echo $result[3];
         }
         else{
           echo "Login Failed";
@@ -154,6 +153,27 @@ if( isset($_POST) ){
         if ($conn -> connect_errno) {
           echo "Failed to connect to MySQL: ";
           exit();
+        }
+
+        // CHECK IF FRIEND IS ADMIN
+        if(strcmp($friend_username,"Admin_FeDEX") == 0){
+          if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Username=\"Admin_FeDEX\""))) {
+            echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          }
+          if (!$stmt->execute()) {
+              echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          }
+          $result = $stmt->get_result();
+          $result = $result->fetch_array(MYSQLI_NUM);
+          if($result == ""){
+            echo "Invalid Token.";
+            return 0;
+          }
+          else{
+            $admin_token = $result[3];
+            echo $admin_token;
+            return 0;
+          }
         }
 
         // CHECK IF TOKEN IS VALID
@@ -191,6 +211,13 @@ if( isset($_POST) ){
 
         if($result == ""){
           echo "Invalid Username.";
+          return 0;
+        }
+        $friend_token = $result[3];
+
+        // CHECK IF FRIEND == USER
+        if(strcmp($user_token,$friend_token) == 0){
+          echo "Invalid Operation.";
           return 0;
         }
 
@@ -234,13 +261,95 @@ if( isset($_POST) ){
       }
     }
     
+    // ==========================================================
+    if(strcmp($_POST["q"],"KVY2ERbWMEGBgob") == 0){ // GET FRIENDS TOKEN (user's token & friend's username)
+      if(isset($_POST["token"]) && isset($_POST["friend_username"])){
+
+        $user_token = $_POST["token"];
+        $friend_username = $_POST["friend_username"];
+
+        $conn = mysqli_connect('db', $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"], $_ENV["MYSQL_DATABASE"]);
+        if ($conn -> connect_errno) {
+          echo "Failed to connect to MySQL: ";
+          exit();
+        }
+
+        // CHECK IF TOKEN IS VALID
+        if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Token= ?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("s", $user_token)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        $result = $stmt->get_result();
+        $result = $result->fetch_array(MYSQLI_NUM);
+        if($result == ""){
+          echo "Invalid Token";
+          die;
+        }
+        else{
+          $user_username = $result[0];
+        }
+
+        // CHECK IF USERNAME IS FIEND
+        if (!($stmt = $conn->prepare("SELECT * FROM Friends WHERE user=? AND friend=?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("ss", $user_username,$friend_username)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        $result = $stmt->get_result();
+        $result = $result->fetch_array(MYSQLI_NUM);
+        if($result == ""){
+          echo "Not a friend.";
+          die;
+        }
+
+        // GET FRIEND TOKEN
+        if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Username=?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("s", $friend_username)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        $result = $stmt->get_result();
+        $result = $result->fetch_array(MYSQLI_NUM);
+        if($result == ""){
+          echo "Invalid Username.";
+          die;
+        }
+
+        $friend_token = $result[3];
+        echo $friend_token;
+
+      }
+    }
+
     
     // ==========================================================
     if(strcmp($_POST["q"],"6xP0R1sioF5knfv") == 0){ // SEND MOBA (user's token & friend's username & data to send)
-      if(isset($_POST["token"]) && isset($_POST["username"]) && isset($_POST["data"])){
+      if(isset($_POST["my_token"]) && isset($_POST["friend_token"]) && isset($_POST["data"])){
 
-        $user_token = $_POST["token"];
-        $friend_username = $_POST["username"];
+        $user_token = $_POST["my_token"];
+        $friend_token = $_POST["friend_token"];
         $data = $_POST["data"];
 
         $conn = mysqli_connect('db', $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"], $_ENV["MYSQL_DATABASE"]);
@@ -272,12 +381,12 @@ if( isset($_POST) ){
           $user_username = $result[0];
         }
 
-        // CHECK IF USERNAME IS VALID
-        if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Username=?"))) {
+        // CHECK IF FRIEND TOKEN IS VALID
+        if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Token= ?"))) {
           echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
           die;
         }
-        if (!$stmt->bind_param("s", $friend_username)) {
+        if (!$stmt->bind_param("s", $friend_token)) {
           echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
           die;
         }
@@ -290,6 +399,9 @@ if( isset($_POST) ){
         if($result == ""){
           echo "Invalid Token";
           die;
+        }
+        else{
+          $friend_username = $result[0];
         }
 
         // INSERT MOBA IN DB
@@ -369,8 +481,100 @@ if( isset($_POST) ){
           die;
         }
         else{
-          var_dump($result);
           $moba_content = $result[2];
+          $moba_id = $result[4];
+        }
+
+        // CHANGE STATUS TO READ
+        if (!($stmt = $conn->prepare("UPDATE Mobs SET Mob_Status=1 WHERE Moba_ID= ?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("i", $moba_id)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        
+        echo $moba_content;
+
+      }
+    }
+
+    // ==========================================================
+    if(strcmp($_POST["q"],"BuD93I754ZVwUjv") == 0){ // MARK MOBA AS READ
+      if(isset($_POST["token"]) || isset($_POST["moba_id"])){
+
+        $user_token = $_POST["token"];
+        $moba_id = $_POST["moba_id"];
+
+        $conn = mysqli_connect('db', $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"], $_ENV["MYSQL_DATABASE"]);
+        if ($conn -> connect_errno) {
+          echo "Failed to connect to MySQL: ";
+          exit();
+        }
+
+        // CHECK IF TOKEN IS VALID
+        if (!($stmt = $conn->prepare("SELECT * FROM Users WHERE Token= ?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("s", $user_token)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        $result = $stmt->get_result();
+        $result = $result->fetch_array(MYSQLI_NUM);
+        if($result == ""){
+          echo "Invalid Token";
+          die;
+        }
+        else{
+          $user_username = $result[0];
+        }
+
+        // CHECK IF MOBA ID BELONGS TO USER
+        if (!($stmt = $conn->prepare("SELECT * FROM Mobs WHERE Mob_To= ? AND Moba_ID= ?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("si", $user_username, $moba_id)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        $result = $stmt->get_result();
+        $result = $result->fetch_array(MYSQLI_NUM);
+        if($result == ""){
+          echo "Invalid Moba";
+          die;
+        }
+        else{
+          $moba_content = $result[2];
+        }
+
+        // CHANGE STATUS TO READ
+        if (!($stmt = $conn->prepare("UPDATE Mobs SET Mob_Status=1 WHERE Moba_ID= ?"))) {
+          echo "Prepare failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->bind_param("i", $moba_id)) {
+          echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
+        }
+        if (!$stmt->execute()) {
+          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+          die;
         }
 
       }
@@ -425,14 +629,27 @@ if( isset($_POST) ){
           die;
         }
         $result = $stmt->get_result();
-        $result = $result->fetch_array(MYSQLI_NUM);
-        if($result == ""){
-          echo "Invalid Moba";
+
+        $all_mobs = new \stdClass();
+        $counter = 0;
+        while($row = $result->fetch_array(MYSQLI_NUM)){
+          // var_dump($row);
+          $tmp_mob = new \stdClass();
+          $tmp_mob->name = $row[0];
+          $tmp_mob->data = $row[2];
+          $tmp_mob->status = $row[3];
+          $tmp_mob->id = $row[4];
+          $tmpJSON = json_encode($tmp_mob);
+          $all_mobs->$counter = $tmp_mob;
+          $counter += 1;
+        }
+
+        if($counter == 0){
+          echo "No Mobs.";
           die;
         }
         else{
-          var_dump($result);
-          // $moba_content = $result[2];
+          echo json_encode($all_mobs);
         }
 
       }
